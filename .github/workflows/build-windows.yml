@@ -57,3 +57,19 @@ jobs:
         with:
           files: SeatRotator-Windows-Portable.zip
           generate_release_notes: true
+
+      # Release 资产在部分网络下下载很慢；同时把 zip 推到 artifacts 分支，便于 git 拉取
+      - name: Publish zip to artifacts branch (tags)
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        run: |
+          set -e
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout --orphan artifacts-build
+          git rm -rf . --quiet
+          cp "SeatRotator-Windows-Portable.zip" .
+          printf 'Windows portable build: %s\nCommit: %s\n' "${GITHUB_REF_NAME}" "${GITHUB_SHA}" > BUILD_INFO.txt
+          git add "SeatRotator-Windows-Portable.zip" BUILD_INFO.txt
+          git commit -m "Windows portable build ${GITHUB_REF_NAME}"
+          git push -f origin HEAD:artifacts
