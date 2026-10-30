@@ -22,6 +22,8 @@
 
 [▶ 观看 35 秒完整版（MP4，1080p，约 3.1 MB）](docs/media/seat-app-promo-35s.mp4)
 
+[⬇ 或从 Releases 直接下载/播放](https://github.com/Asteriya-PhD/seat-rotation-assistant/releases/latest/download/seat-app-promo-35s.mp4)
+
 > 视频使用匿名示例数据（学生01、学生02…），不含任何真实学生信息。
 
 ## 界面预览
