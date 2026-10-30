@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+build/
+dist/
+*.spec
+数据/sessions/
+数据/logs/
+数据/last_url.txt
+导出结果/*.xlsx
+.DS_Store

@@ -1,0 +1,59 @@
+name: build-windows-standalone
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install PyInstaller
+        run: python -m pip install --upgrade pip pyinstaller
+
+      - name: Build with PyInstaller
+        shell: pwsh
+        run: >
+          pyinstaller --noconfirm --clean --name SeatRotator --console
+          --paths app --add-data "app/web;app/web" windows_entry.py
+
+      - name: Assemble portable folder
+        shell: pwsh
+        run: |
+          $out = "dist/座位轮转助手_Windows免安装"
+          New-Item -ItemType Directory -Force -Path $out | Out-Null
+          Copy-Item "dist/SeatRotator/*" $out -Recurse -Force
+          New-Item -ItemType Directory -Force -Path "$out/示例座位表" | Out-Null
+          Copy-Item "示例座位表/示例座位表（匿名）.xlsx" "$out/示例座位表/" -Force
+          Copy-Item "使用说明_Windows.txt" "$out/使用说明.txt" -Force
+          Copy-Item "启动座位轮转助手.bat" "$out/启动座位轮转助手.bat" -Force
+          New-Item -ItemType Directory -Force -Path "$out/导出结果" | Out-Null
+          New-Item -ItemType Directory -Force -Path "$out/数据" | Out-Null
+          "导出的 Excel 会保存在这里。" | Set-Content -Encoding UTF8 "$out/导出结果/说明.txt"
+          "程序运行时自动生成，可删除。" | Set-Content -Encoding UTF8 "$out/数据/说明.txt"
+          Compress-Archive -Path $out -DestinationPath "座位轮转助手_Windows免安装.zip" -Force
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: 座位轮转助手_Windows免安装
+          path: 座位轮转助手_Windows免安装.zip
+          retention-days: 30
+
+      - name: Create / update release (tags)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: 座位轮转助手_Windows免安装.zip
+          generate_release_notes: true

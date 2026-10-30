@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>座位轮转助手</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231f5c4d'/%3E%3Ctext x='16' y='22' font-size='18' text-anchor='middle' fill='%23fff' font-family='PingFang SC,sans-serif'%3E%E5%BA%A7%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-step="1">
+
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true"><span>座</span></div>
+      <div class="brand-text">
+        <h1>座位轮转助手</h1>
+        <p>离线 · 高保真座位表轮转</p>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <span class="mode-chip" id="mode-chip" title="页面不访问任何外网，所有数据只在本机处理">
+        <span class="dot"></span><span id="mode-label">本地服务</span>
+      </span>
+      <button class="ghost-btn" data-action="open-help">使用说明</button>
+    </div>
+  </header>
+
+  <nav class="stepper" id="stepper" aria-label="操作步骤"></nav>
+
+  <main class="stage">
+
+    <!-- ① 导入 -->
+    <section class="step" id="step-1" data-step="1">
+      <div class="import-layout">
+        <div class="card import-card">
+          <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="选择或拖入 xlsx 座位表">
+            <div class="dz-icon" aria-hidden="true">
+              <svg viewBox="0 0 48 48" width="46" height="46" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="8" y="6" width="32" height="36" rx="4"></rect>
+                <path d="M8 17h32M8 28h32M19 6v36M30 6v36"></path>
+                <path d="M24 34v-9M20.5 28.5 24 25l3.5 3.5" stroke-width="2.2"></path>
+              </svg>
+            </div>
+            <h2>把座位表拖到这里</h2>
+            <p class="dz-sub">或 <button class="link-btn" data-action="pick-file">点击选择文件</button></p>
+            <p class="dz-meta">支持 .xlsx 格式 · 单个文件不超过 20 MB<br>完全离线：文件只在本机浏览器里读取</p>
+            <button class="primary-btn" data-action="pick-file">选择 .xlsx 文件</button>
+          </div>
+
+          <div class="import-status" id="import-status" hidden>
+            <span class="spinner" aria-hidden="true"></span>
+            <div><b id="import-status-title">正在读取工作簿…</b><p id="import-status-sub">解析工作表与单元格格式</p></div>
+          </div>
+
+          <div class="import-error" id="import-error" hidden>
+            <div class="err-title">导入失败</div>
+            <p id="import-error-text"></p>
+            <button class="ghost-btn" data-action="pick-file">重新选择文件</button>
+          </div>
+
+          <div class="sheet-choose" id="sheet-choose" hidden>
+            <div class="sheet-choose-head">
+              <b>这个工作簿有多个工作表，请选择座位表所在的那一个</b>
+              <span class="muted" id="sheet-choose-file"></span>
+            </div>
+            <div class="sheet-choose-list" id="sheet-choose-list"></div>
+          </div>
+
+          <div class="import-demo" id="import-demo" hidden>
+            <div class="demo-badge">演示模式</div>
+            <div class="demo-body">
+              <b>无需后端，先用真实样例走一遍完整流程</b>
+              <p>内置数据：高二上学期座位第五轮.xlsx · 14 行 × 15 列 · 57 座 · 8 个大组</p>
+            </div>
+            <button class="primary-btn" data-action="load-demo">载入示例座位表</button>
+          </div>
+
+          <p class="import-foot">导入后会先进入「核对结构」，识别结果可逐格修正，确认无误再轮转。</p>
+        </div>
+
+        <aside class="card import-side">
+          <h3>这个工具会替你做什么</h3>
+          <ul class="feature-list">
+            <li>
+              <b>格式零损失</b>
+              <span>在原 Excel 上原位换字：合并单元格、边框、底色、字体、行高列宽、打印设置都保留。</span>
+            </li>
+            <li>
+              <b>识别容错</b>
+              <span>讲台、门窗、排号、走道、课代表区自动识别，不准的地方单击改角色即可。</span>
+            </li>
+            <li>
+              <b>规则说人话</b>
+              <span>前后 / 左右 / 整组 / 全班，选完立刻生成中文描述，并校验是否丢人、重人。</span>
+            </li>
+            <li>
+              <b>完全离线</b>
+              <span>只监听本机，不联网、不上传，断网也能用；关掉终端即停止服务。</span>
+            </li>
+          </ul>
+          <div class="tip">小提示：讲台在表格的上方还是下方，决定了「向前 / 向后」的方向。核对结构时可以手动切换。</div>
+          <div class="mini-flow">
+            <h3>五步完成</h3>
+            <ol>
+              <li><b>导入</b><span>.xlsx 座位表拖进来</span></li>
+              <li><b>核对</b><span>座位 / 大组 / 讲台</span></li>
+              <li><b>定规则</b><span>前后 / 左右 / 整组</span></li>
+              <li><b>看预览</b><span>逐轮核对，不重不漏</span></li>
+              <li><b>导出</b><span>格式原样保留</span></li>
+            </ol>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ② 核对结构 -->
+    <section class="step" id="step-2" data-step="2" hidden>
+      <div class="workspace">
+        <div class="workspace-main">
+          <div class="card grid-card">
+            <div class="toolbar">
+              <div class="toolbar-left">
+                <span class="file-chip" id="file-chip">—</span>
+                <label class="sheet-pick" id="sheet-pick-wrap" hidden>工作表
+                  <select id="sheet-select"></select>
+                </label>
+              </div>
+              <div class="toolbar-right">
+                <label class="switch" title="在格子上叠加识别角色的标记">
+                  <input type="checkbox" id="toggle-roles" checked><span>显示角色</span>
+                </label>
+                <div class="zoom-group" role="group" aria-label="缩放">
+                  <button data-action="zoom-out" title="缩小">−</button>
+                  <button class="zoom-value" id="zoom-value" data-action="zoom-fit" title="点击恢复适应窗口">适应</button>
+                  <button data-action="zoom-in" title="放大">＋</button>
+                </div>
+                <button class="ghost-btn" data-action="undo" id="undo-btn" disabled title="撤销上一次结构调整（⌘Z）">↩ 撤销</button>
+              </div>
+            </div>
+            <div class="grid-scroll" id="grid-edit"></div>
+            <div class="grid-foot">
+              <span class="grid-hint">单击任意格子修改角色；标记为「座位」的格子可单独固定。灰色=结构，虚线=空位，斜纹=忽略。</span>
+              <span class="legend" id="role-legend"></span>
+            </div>
+          </div>
+          <div class="statsbar" id="statsbar"></div>
+        </div>
+
+        <aside class="workspace-side">
+          <div class="card side-card">
+            <div class="side-head">
+              <h3>大组</h3>
+              <span class="pill" id="group-count-chip">0 组</span>
+            </div>
+            <div class="podium-row">
+              <span class="podium-label">讲台位置</span>
+              <div class="segmented small" id="podium-seg">
+                <button data-podium="above">上方</button>
+                <button data-podium="below">下方</button>
+              </div>
+            </div>
+            <div class="group-list" id="group-list"></div>
+            <p class="side-hint">大组由组标签或连续座位列决定。识别不准时，可改名、固定，或与相邻大组合并 / 拆分。</p>
+          </div>
+          <div class="card side-card side-card--soft">
+            <h3>怎么改角色</h3>
+            <ul class="mini-list">
+              <li>单击格子 → 在浮层里选择「座位 / 结构 / 空位 / 忽略」。</li>
+              <li>结构 = 讲台、门窗、标题、排号、组标签；空位 = 写了「空」的占位；忽略 = 课代表区等非座位文字。</li>
+              <li>改错了点右上角「撤销」，可连续撤销 50 步。</li>
+            </ul>
+          </div>
+          <div class="step-nav">
+            <button class="ghost-btn" data-action="goto" data-step="1">← 上一步</button>
+            <button class="primary-btn" data-action="goto" data-step="3">下一步：轮转规则 →</button>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ③ 轮转规则 -->
+    <section class="step" id="step-3" data-step="3" hidden>
+      <div class="workspace workspace--scroll">
+        <div class="workspace-main">
+          <div class="card">
+            <div class="card-head">
+              <h2>轮转预设</h2>
+              <p>先选一个最接近的，再到下面微调</p>
+            </div>
+            <div class="preset-grid" id="preset-grid"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <h2>高级参数</h2>
+              <p>改动后自动重新计算并校验；结果可在下一步逐轮预览</p>
+            </div>
+            <div class="params">
+              <div class="param-row">
+                <div class="param-label">轮转范围</div>
+                <div class="param-controls">
+                  <div class="segmented" id="seg-mode">
+                    <button data-mode="inner">组内轮转</button>
+                    <button data-mode="swap">整组互换</button>
+                    <button data-mode="class">全班整体</button>
+                    <button data-mode="combo">整组 + 组内</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="param-row">
+                <div class="param-label">前后移动</div>
+                <div class="param-controls">
+                  <div class="segmented small" id="row-dir">
+                    <button data-dir="none">不动</button>
+                    <button data-dir="front">向前</button>
+                    <button data-dir="back">向后</button>
+                  </div>
+                  <div class="stepper" id="row-steps" role="group" aria-label="前后移动排数">
+                    <button data-steps="1">1</button><button data-steps="2">2</button><button data-steps="3">3</button><span class="unit">排</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="param-row">
+                <div class="param-label">左右移动</div>
+                <div class="param-controls">
+                  <div class="segmented small" id="col-dir">
+                    <button data-dir="none">不动</button>
+                    <button data-dir="left">向左</button>
+                    <button data-dir="right">向右</button>
+                  </div>
+                  <div class="stepper" id="col-steps" role="group" aria-label="左右移动列数">
+                    <button data-steps="1">1</button><button data-steps="2">2</button><button data-steps="3">3</button><span class="unit">列</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="param-row">
+                <div class="param-label">整组移动</div>
+                <div class="param-controls">
+                  <div class="segmented small" id="group-dir">
+                    <button data-dir="none">不动</button>
+                    <button data-dir="left">向左</button>
+                    <button data-dir="right">向右</button>
+                  </div>
+                  <div class="stepper" id="group-steps" role="group" aria-label="整组移动组数">
+                    <button data-steps="1">1</button><button data-steps="2">2</button><button data-steps="3">3</button><span class="unit">组</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="param-row">
+                <div class="param-label">固定大组</div>
+                <div class="param-controls">
+                  <div class="chips chips--inline" id="fixed-groups"></div>
+                  <span class="param-hint" id="fixed-groups-hint">点击组名可固定，被固定的组不参与任何轮转</span>
+                </div>
+              </div>
+
+              <div class="param-row">
+                <div class="param-label">轮转次数</div>
+                <div class="param-controls">
+                  <div class="rounds-control">
+                    <input type="range" id="rounds-range" min="1" max="12" step="1" value="3" aria-label="轮转次数">
+                    <output id="rounds-out">3 轮</output>
+                  </div>
+                  <span class="param-hint">每轮都从原始座位表生成，最多 12 轮</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="workspace-side">
+          <div class="card side-card side-card--sticky">
+            <div class="side-head">
+              <h3>规则摘要</h3>
+              <span class="pill" id="rule-badge"><span class="dot"></span>计算中…</span>
+            </div>
+            <p class="rule-desc" id="rule-desc">正在生成规则描述…</p>
+            <div class="rule-chips" id="rule-chips"></div>
+            <div class="validation" id="validation"></div>
+            <div class="step-nav">
+              <button class="ghost-btn" data-action="goto" data-step="2">← 上一步</button>
+              <button class="primary-btn" data-action="goto" data-step="4">下一步：预览 →</button>
+            </div>
+          </div>
+          <div class="card side-card side-card--soft">
+            <h3>方向是怎么算的</h3>
+            <p class="side-hint" id="direction-hint">讲台位置决定「向前 / 向后」：向后方 = 远离讲台。</p>
+            <p class="side-hint">「组内轮转」只在大组内部循环；「整组互换」让大组整体换位置；「全班整体」忽略走道，全教室一起转。</p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ④ 预览 -->
+    <section class="step" id="step-4" data-step="4" hidden>
+      <div class="workspace">
+        <div class="workspace-main">
+          <div class="card grid-card">
+            <div class="toolbar toolbar--tabs">
+              <div class="tabs" id="round-tabs" role="tablist"></div>
+              <div class="toolbar-right">
+                <label class="switch" title="预览中组长标记（底色）是否跟随学生移动；与导出页开关同步">
+                  <input type="checkbox" id="toggle-preview-marks" checked><span>标记跟随</span>
+                </label>
+                <label class="switch" title="在当前姓名下方显示原座位上的姓名">
+                  <input type="checkbox" id="toggle-compare"><span>对比原始</span>
+                </label>
+                <div class="zoom-group" role="group" aria-label="缩放">
+                  <button data-action="pzoom-out" title="缩小">−</button>
+                  <button class="zoom-value" id="pzoom-value" data-action="pzoom-fit" title="点击恢复适应窗口">适应</button>
+                  <button data-action="pzoom-in" title="放大">＋</button>
+                </div>
+              </div>
+            </div>
+            <div class="grid-scroll" id="grid-preview"></div>
+            <div class="grid-foot">
+              <span class="grid-hint">角标是轮转前所在的座位号；固定座位带金色标记，空位显示为虚线框。组长标记（底色）默认跟随学生显示，可在上方切换。</span>
+              <span class="legend legend--preview" id="preview-legend"></span>
+            </div>
+          </div>
+          <div class="preview-summary" id="preview-summary"></div>
+        </div>
+
+        <aside class="workspace-side">
+          <div class="card side-card">
+            <div class="side-head">
+              <h3>本轮校验</h3>
+              <span class="pill" id="preview-badge">—</span>
+            </div>
+            <div class="mini-stats" id="preview-stats"></div>
+          </div>
+          <div class="card side-card side-card--warn">
+            <div class="side-head">
+              <h3>警告与提示</h3>
+              <span class="pill warn" id="preview-warn-count">0</span>
+            </div>
+            <ul class="warn-list" id="preview-warn-list"></ul>
+            <p class="side-hint">带座位号（如 C9）的提示可以点击，定位到对应格子。</p>
+          </div>
+          <div class="step-nav">
+            <button class="ghost-btn" data-action="goto" data-step="3">← 上一步</button>
+            <button class="primary-btn" data-action="goto" data-step="5">下一步：导出 →</button>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ⑤ 导出 -->
+    <section class="step" id="step-5" data-step="5" hidden>
+      <div class="workspace workspace--scroll">
+        <div class="workspace-main">
+          <div class="card export-card">
+            <div class="card-head">
+              <h2>导出座位表</h2>
+              <p>在原文件上原位替换文字，样式、合并、行高列宽、打印设置完整保留</p>
+            </div>
+
+            <div class="field">
+              <label for="export-name">文件名</label>
+              <div class="input-suffix">
+                <input id="export-name" type="text" autocomplete="off" spellcheck="false" placeholder="正在生成建议文件名…">
+                <span class="suffix">.xlsx</span>
+              </div>
+              <p class="field-hint" id="export-name-hint">默认按原文件名智能递进：第N轮 → 第N+1轮，带日期则替换为新轮日期。导出到「导出结果」，同名文件会自动避让。</p>
+            </div>
+
+            <div class="field">
+              <div class="field-label">导出范围</div>
+              <div class="radio-cards" id="export-scope">
+                <label class="radio-card">
+                  <input type="radio" name="scope" value="current" checked>
+                  <div class="rc-body"><b>仅当前轮</b><span id="scope-current-label">导出第 1 轮</span></div>
+                </label>
+                <label class="radio-card">
+                  <input type="radio" name="scope" value="all">
+                  <div class="rc-body"><b>全部轮次</b><span id="scope-all-label">每轮一个文件</span></div>
+                </label>
+              </div>
+            </div>
+
+            <div class="field field--period">
+              <div class="period-head">
+                <label class="switch switch--wide" for="export-period">
+                  <input type="checkbox" id="export-period" checked>
+                  <span>导出时自动更新表头「座位周期」</span>
+                </label>
+                <span class="period-badge" id="period-badge" hidden></span>
+              </div>
+              <div class="period-body">
+                <div class="period-date-row">
+                  <span class="cycle-label">轮转周期</span>
+                  <div class="segmented small" id="cycle-seg" role="group" aria-label="轮转周期">
+                    <button data-weeks="1">1 周</button>
+                    <button data-weeks="2">2 周</button>
+                    <button data-weeks="3">3 周</button>
+                    <button data-weeks="4">4 周</button>
+                  </div>
+                  <span class="cycle-hint" id="cycle-hint">每轮 2 周（14 天）</span>
+                  <span class="cycle-divider" aria-hidden="true"></span>
+                  <label for="period-start">开始日期</label>
+                  <input type="date" id="period-start" aria-label="第一次轮转开始日期">
+                  <span class="param-hint" id="period-days-hint"></span>
+                </div>
+                <ul class="period-rounds" id="period-rounds"></ul>
+                <p class="field-hint" id="period-hint"></p>
+              </div>
+            </div>
+
+            <div class="field field--marks">
+              <label class="switch switch--wide" for="export-move-marks">
+                <input type="checkbox" id="export-move-marks" checked>
+                <span>组长标记（单元格底色）跟随学生移动</span>
+              </label>
+              <span class="marks-badge" id="export-marks-badge" hidden>检测到 0 个带底色的座位</span>
+              <p class="field-hint" id="export-marks-hint">导出时带底色的座位会跟着对应学生移动（组长标记跟随组长）。</p>
+            </div>
+
+            <div class="field">
+              <label class="switch">
+                <input type="checkbox" id="export-open-folder"><span>导出后打开导出文件夹</span>
+              </label>
+            </div>
+
+            <div class="export-actions">
+              <button class="primary-btn lg" data-action="export">导出 .xlsx</button>
+              <span class="muted" id="export-rule-summary"></span>
+            </div>
+
+            <div id="export-error" class="error-card" hidden>
+              <div class="err-title">导出失败</div>
+              <p id="export-error-text"></p>
+            </div>
+
+            <div id="export-success" class="success-card" hidden></div>
+          </div>
+
+          <div class="card note-card">
+            <h3>导出说明</h3>
+            <ul class="mini-list">
+              <li>第 N 轮都从<strong>原始工作簿</strong>重新生成，不是在上一次结果上二次修改，格式每次完整。</li>
+              <li>组长标记（橙色等单元格底色）默认<strong>跟随学生移动</strong>；关闭「组长标记跟随」开关则底色留在原坐标（旧行为）。</li>
+              <li>表头「座位周期」默认按每轮开始日期自动顺延（如 2026.11.14～11.28），跨年自动补年份；关闭开关则保持原表头。</li>
+              <li>第 12~14 行课代表区若已标记为「忽略」，导出时一字不动。</li>
+              <li>导出失败会给出中文原因；可先在预览页确认人数无误再导出。</li>
+            </ul>
+          </div>
+        </div>
+
+        <aside class="workspace-side">
+          <div class="card side-card">
+            <h3>将导出的文件</h3>
+            <ul class="file-preview-list" id="file-preview"></ul>
+            <p class="side-hint" id="export-side-hint">当前在「原始」页时，会导出第 1 轮。</p>
+          </div>
+          <div class="card side-card side-card--soft">
+            <h3>本次导出</h3>
+            <div class="export-summary" id="export-summary"></div>
+          </div>
+          <div class="step-nav">
+            <button class="ghost-btn" data-action="goto" data-step="4">← 上一步</button>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<input type="file" id="file-input" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden>
+
+<div class="popover" id="cell-popover" hidden></div>
+
+<div class="modal" id="modal" hidden>
+  <div class="modal-backdrop" data-action="close-modal"></div>
+  <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-head">
+      <h2 id="modal-title">标题</h2>
+      <button class="icon-btn" data-action="close-modal" aria-label="关闭">×</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-foot" id="modal-foot"></div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script src="engine.js"></script>
+<script src="api.js"></script>
+<script src="mock/mock.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
