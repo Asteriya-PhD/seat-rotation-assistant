@@ -16,6 +16,14 @@
 解压后双击 **`启动座位轮转助手.bat`** 即可，**不需要安装 Python**。
 （首次运行如遇 SmartScreen 提示，点「更多信息 → 仍要运行」。）
 
+## 🎬 宣传视频
+
+[![35 秒宣传片](docs/media/seat-app-promo-preview.gif)](docs/media/seat-app-promo-35s.mp4)
+
+[▶ 观看 35 秒完整版（MP4，1080p，约 3.1 MB）](docs/media/seat-app-promo-35s.mp4)
+
+> 视频使用匿名示例数据（学生01、学生02…），不含任何真实学生信息。
+
 ## 界面预览
 
 | 导入 | 核对结构 |

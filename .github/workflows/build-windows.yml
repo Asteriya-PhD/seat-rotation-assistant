@@ -55,7 +55,9 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          files: SeatRotator-Windows-Portable.zip
+          files: |
+            SeatRotator-Windows-Portable.zip
+            docs/media/seat-app-promo-35s.mp4
           generate_release_notes: true
 
       # Release 资产在部分网络下下载很慢；同时把 zip 推到 artifacts 分支，便于 git 拉取
