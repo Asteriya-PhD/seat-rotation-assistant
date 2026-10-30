@@ -7,7 +7,7 @@
 
 到本仓库的 **Releases** 页面下载：
 
-- `座位轮转助手_Windows免安装.zip`
+- `SeatRotator-Windows-Portable.zip`
 
 解压后双击 **`启动座位轮转助手.bat`** 即可，**不需要安装 Python**。
 （首次运行如遇 SmartScreen 提示，点「更多信息 → 仍要运行」。）
@@ -41,7 +41,7 @@ pyinstaller --noconfirm --clean --name SeatRotator --console --paths app --add-d
 ```
 
 GitHub Actions 会自动构建：每次 push 到 `main` 或打 `v*` tag 时，
-在 Actions 里可下载 `座位轮转助手_Windows免安装` artifact；打 tag 会自动创建 Release。
+在 Actions 里可下载 `SeatRotator-Windows-Portable` artifact；打 tag 会自动创建 Release。
 
 ## 说明
 
